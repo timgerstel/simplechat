@@ -3,10 +3,22 @@
  */
 /* $begin echoservertmain */
 #include "csapp.h"
+#include <stdbool.h>
 
-char* users[512];
+typedef struct{
+    int fd;
+    char* username;
+    bool valid;
+}Client_c;
+
 int usercount = 0;
+int lastremoved = 0;
+Client_c connected[100];
+
 void *thread(void *vargp);
+void add_client(char*, int);
+void remove_client(char*);
+void send_message(char*);
 
 void echo(int connfd)
 {
@@ -20,17 +32,83 @@ void echo(int connfd)
     username = malloc(strlen(buf));
     strcpy(username, buf);
     *(username + strcspn(username, "\n")) = '\0';
+    add_client(username, connfd);
+    printf("@%s connected.\n", username);
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
-        printf("server received %d bytes\n", n);
-        printf("User: %s\n", username);
-        printf("Message: %s\n", buf);
-        Rio_writen(connfd, buf, n);
+        printf("@%s: %s\n", username, buf);
+        if(!strcmp(buf, "list-users\n")){
+            int i;
+            for(i = 0; i < usercount; i++){
+                if(connected[i].valid){
+                    char* user;
+                    user = malloc(strlen(connected[i].username) + 1);
+                    strcpy(user, connected[i].username);
+                    strcat(user, "\n");
+                    Rio_writen(connfd, user, strlen(user));
+                }
+            }
+        }
+        if(!strcmp(buf, "quit\n")){
+            remove_client(username);
+            printf("@%s disconnected.", username);
+        }
+        send_message(buf);
+    }
+}
+
+void add_client(char* username, int connfd){
+    if(!strcmp(username, "") || username == NULL){
+        app_error("Invalid username");
+    }
+    connected[usercount].fd = connfd;
+    connected[usercount].username = username;
+    connected[usercount].valid = true;
+    usercount++;
+}
+
+void remove_client(char* username){
+    int i;
+    for(i = 0; i < 100; i++){
+        if(!strcmp(connected[i].username, username)){
+            connected[i].valid = false;
+            usercount--;
+        }
+        if(i < 99){
+            if(!connected[i].valid && connected[i+1].valid){
+                connected[i].valid = true;
+                connected[i+1].valid = false;
+                connected[i].username = connected[i+1].username;
+                connected[i].fd = connected[i+1].fd;
+            }
+        }
+    }
+}
+
+void send_message(char* buf){
+    char* cpy;
+    char* username;
+    char* message;
+    int i;
+    cpy = malloc(strlen(buf));
+    username = malloc(strcspn(cpy, " "));
+    message = malloc(strlen(cpy) - strlen(username));
+    strcpy(cpy, buf);
+    strncpy(username, cpy + 1, strcspn(cpy, " ") - 1);
+    *(username + strcspn(username, "\n")) = '\0';
+    strcpy(message, cpy + strlen(username) + 2);
+    printf("The message \"%s\" was directed to %s.\n", message, username);
+    for(i = 0; i < usercount; i++){
+        if(!strcmp(connected[i].username, username)){
+            printf("Sending message to %s\n", username);
+            int clientfd = connected[i].fd;
+            Rio_writen(clientfd, buf, strlen(buf));
+        }
     }
 }
 
 int main(int argc, char **argv) 
 {
-    int listenfd, *connfdp;
+    int listenfd, *connfdp, i;
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     pthread_t tid; 
@@ -41,6 +119,11 @@ int main(int argc, char **argv)
     }
     listenfd = Open_listenfd(argv[1]);
 
+    for(i = 0; i < 100; i++){
+        connected[i].fd = 0;
+        connected[i].username = "";
+        connected[i].valid = false;
+    }
     while (1) {
         clientlen=sizeof(struct sockaddr_storage);
     	connfdp = Malloc(sizeof(int)); //line:conc:echoservert:beginmalloc
