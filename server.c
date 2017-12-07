@@ -12,11 +12,17 @@ void echo(int connfd)
 {
     int n;
     char buf[MAXLINE];
+    char* username;
     rio_t rio;
 
     Rio_readinitb(&rio, connfd);
+    Rio_readlineb(&rio, buf, MAXLINE);
+    username = malloc(strlen(buf));
+    strcpy(username, buf);
+    *(username + strcspn(username, "\n")) = '\0';
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
         printf("server received %d bytes\n", n);
+        printf("User: %s\n", username);
         printf("Message: %s\n", buf);
         Rio_writen(connfd, buf, n);
     }

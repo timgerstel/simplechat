@@ -20,6 +20,9 @@ int main(int argc, char **argv)
 
     clientfd = Open_clientfd(host, port);
     Rio_readinitb(&rio, clientfd);
+    strcpy(buf, username);
+    strcat(buf, "\n");
+    Rio_writen(clientfd, buf, strlen(buf));
 
     while (Fgets(buf, MAXLINE, stdin) != NULL) {
         if(!(strcmp(buf, "quit\n"))){
