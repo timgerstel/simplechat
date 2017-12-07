@@ -1,5 +1,6 @@
 The provided code is the concurrent echo client and server from class. You can use this code to build your chat client and server.
 
-The client app is a simple, 2 threaded process.  The first thread reads data from stdin and sends it to the server.  The second thread checks to see if the server has sent a message.
+The client app is a simple, 2 threaded process.  The first thread reads data from stdin and sends it to the server.  The second thread checks to see if the server has sent a message.  Each thread is detached and therefore asynchronous.  After the client establishes a connection, it sends the username argument to the server.  One issue we faced in the client was that, after spawning the send and receive threads, the client would instantly exit.  This issue was resolved by adding “Pthread_exit(NULL);” after spawning both threads.
 
+The server app consists of the initial code skeleton, in addition to an array of connected client and appropriate methods to add/remove clients as well as send/broadcast messages.  The echo function parses the username, and adds it to an array of structs which contains the clients username and connection information.  A running index of connected clients is kept to make searching for users less costly.  However, this method increases the cost of removing clients.  After removing a client, the array is sorted by removing empty spaces between entries, keeping search cost low.
 
