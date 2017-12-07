@@ -97,23 +97,27 @@ void send_message(char* buf, char* sender, int connfd){
     *(message + strcspn(message, "\n")) = '\0';
     printf("The message \"%s\" was directed to %s.\n", message, receiver);
     for(i = 0; i < usercount; i++){
-        if(!strcmp(connected[i].username, receiver)){
-            char* tosend;
-            tosend = malloc(strlen(sender) + strlen(message) + 4);
-            strcpy(tosend, "@");
-            strcat(tosend, sender);
-            strcat(tosend, " ");
-            strcat(tosend, message);
-            strcat(tosend, "\n");
-            Rio_writen(connected[i].fd, tosend, strlen(tosend));
-            free(receiver);
-            free(message);
-            break;
-        } else if (i == (usercount-1)){
-            char* err = "User not found\n";
-            Rio_writen(connfd, err, strlen(err));
+        if(!strcmp(receiver, "broadcast")){
+            Rio_writen(connected[i].fd, buf, strlen(buf));
+        } else {
+            if(!strcmp(connected[i].username, receiver)){
+                char* tosend;
+                tosend = malloc(strlen(sender) + strlen(message) + 4);
+                strcpy(tosend, "@");
+                strcat(tosend, sender);
+                strcat(tosend, " ");
+                strcat(tosend, message);
+                strcat(tosend, "\n");
+                Rio_writen(connected[i].fd, tosend, strlen(tosend));
+                break;
+            } else if (i == (usercount-1)){
+                char* err = "User not found\n";
+                Rio_writen(connfd, err, strlen(err));
+            }
         }
     }
+    free(receiver);
+    free(message);
     return;
 }
 
