@@ -1,4 +1,4 @@
-/**Timothy Gerstel and Jonathan Azevedo
+/*Timothy Gerstel and Jonathan Azevedo*/
 /* 
  * echoservert.c - A concurrent echo server using threads
  */
@@ -48,12 +48,12 @@ void echo(int connfd)
                     Rio_writen(connfd, user, strlen(user));
                 }
             }
-        }
-        if(!strcmp(buf, "quit\n")){
+        } else if(!strcmp(buf, "quit\n")){
             printf("@%s disconnected.\n", username);
             remove_client(username);
+        } else {
+            send_message(buf, connfd);
         }
-        send_message(buf, connfd);
     }
 }
 

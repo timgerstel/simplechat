@@ -1,11 +1,11 @@
-/**Timothy Gerstel and Jonathan Azevedo
+/*Timothy Gerstel and Jonathan Azevedo*/
 /*
  * echoclient.c - An echo client
  */
 /* $begin echoclientmain */
 #include "csapp.h"
 
-void *io_thread(void *vargp);
+void *send_thread(void *vargp);
 void *receive_thread(void *vargp);
 
 void prompt(){
@@ -32,12 +32,12 @@ int main(int argc, char **argv)
     strcpy(buf, username);
     strcat(buf, "\n");
     Rio_writen(clientfd, buf, strlen(buf));
-    Pthread_create(&tid1, NULL, io_thread, (void *) &clientfd);
+    Pthread_create(&tid1, NULL, send_thread, (void *) &clientfd);
     Pthread_create(&tid2, NULL, receive_thread, (void *) &rio);
     Pthread_exit(NULL);
 }
 
-void *io_thread(void *vargp){
+void *send_thread(void *vargp){
     int clientfd = *((int *)vargp);
     Pthread_detach(pthread_self()); //line:conc:echoservert:detach
     //Free(vargp);
