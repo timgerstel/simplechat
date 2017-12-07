@@ -18,7 +18,7 @@ Client_c connected[100];
 void *thread(void *vargp);
 void add_client(char*, int);
 void remove_client(char*);
-void send_message(char*);
+void send_message(char*, int connfd);
 
 void echo(int connfd)
 {
@@ -35,7 +35,7 @@ void echo(int connfd)
     add_client(username, connfd);
     printf("@%s connected.\n", username);
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
-        printf("@%s: %s\n", username, buf);
+        //printf("@%s: %s\n", username, buf);
         if(!strcmp(buf, "list-users\n")){
             int i;
             for(i = 0; i < usercount; i++){
@@ -49,10 +49,10 @@ void echo(int connfd)
             }
         }
         if(!strcmp(buf, "quit\n")){
+            printf("@%s disconnected.\n", username);
             remove_client(username);
-            printf("@%s disconnected.", username);
         }
-        send_message(buf);
+        send_message(buf, connfd);
     }
 }
 
@@ -84,7 +84,7 @@ void remove_client(char* username){
     }
 }
 
-void send_message(char* buf){
+void send_message(char* buf, int connfd){
     char* cpy;
     char* username;
     char* message;
@@ -96,12 +96,17 @@ void send_message(char* buf){
     strncpy(username, cpy + 1, strcspn(cpy, " ") - 1);
     *(username + strcspn(username, "\n")) = '\0';
     strcpy(message, cpy + strlen(username) + 2);
-    printf("The message \"%s\" was directed to %s.\n", message, username);
+    //printf("The message \"%s\" was directed to %s.\n", message, username);
     for(i = 0; i < usercount; i++){
-        if(!strcmp(connected[i].username, username)){
-            printf("Sending message to %s\n", username);
+        if(!strcmp(username, "broadcast")){
+            Rio_writen(connected[i].fd, buf, strlen(buf));
+        } else if(!strcmp(connected[i].username, username)){
             int clientfd = connected[i].fd;
             Rio_writen(clientfd, buf, strlen(buf));
+            break;
+        } else if (i == (usercount-1)){
+            char* err = "User not found\n";
+            Rio_writen(connfd, err, strlen(err));
         }
     }
 }
