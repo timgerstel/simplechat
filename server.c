@@ -95,7 +95,7 @@ void send_message(char* buf, char* sender, int connfd){
     message = malloc(strlen(buf) - strlen(receiver) + 1);
     strncpy(message, buf + strlen(receiver) + 2, strlen(buf) - strlen(receiver) + 1);
     *(message + strcspn(message, "\n")) = '\0';
-    printf("The message \"%s\" was directed to %s.\n", message, receiver);
+    //printf("The message \"%s\" was directed to %s.\n", message, receiver);
     for(i = 0; i < usercount; i++){
         if(!strcmp(receiver, "broadcast")){
             Rio_writen(connected[i].fd, buf, strlen(buf));
