@@ -1,3 +1,4 @@
+/**Timothy Gerstel and Jonathan Azevedo
 /* 
  * echoservert.c - A concurrent echo server using threads
  */

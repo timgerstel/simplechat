@@ -1,3 +1,4 @@
+/**Timothy Gerstel and Jonathan Azevedo
 /*
  * echoclient.c - An echo client
  */
