@@ -32,6 +32,7 @@ int main(int argc, char **argv)
     strcpy(buf, username);
     strcat(buf, "\n");
     Rio_writen(clientfd, buf, strlen(buf));
+    prompt();
     Pthread_create(&tid1, NULL, send_thread, (void *) &clientfd);
     Pthread_create(&tid2, NULL, receive_thread, (void *) &rio);
     Pthread_exit(NULL);
@@ -42,7 +43,6 @@ void *send_thread(void *vargp){
     Pthread_detach(pthread_self()); //line:conc:echoservert:detach
     //Free(vargp);
     char buf[MAXLINE];
-    prompt();
     while (Fgets(buf, MAXLINE, stdin) != NULL) {
         if(!strcmp(buf, "quit\n")){
             Rio_writen(clientfd, buf, strlen(buf));
@@ -58,11 +58,13 @@ void *send_thread(void *vargp){
 
 void *receive_thread(void *vargp){
     rio_t rio = *((rio_t *)vargp);
+    int n;
     Pthread_detach(pthread_self()); //line:conc:echoservert:detach
     char buf[MAXLINE];
-    while(1){
-        Rio_readlineb(&rio, buf, MAXLINE);
+    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0){
+        //Rio_readlineb(&rio, buf, MAXLINE);
         Fputs(buf, stdout);
+        //prompt();
     }
     return NULL;
 }

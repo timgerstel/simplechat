@@ -72,7 +72,6 @@ void remove_client(char* username){
     for(i = 0; i < 100; i++){
         if(!strcmp(connected[i].username, username)){
             connected[i].valid = false;
-            usercount--;
         }
         if(i < 99){
             if(!connected[i].valid && connected[i+1].valid){
@@ -83,6 +82,7 @@ void remove_client(char* username){
             }
         }
     }
+    usercount--;
 }
 
 void send_message(char* buf, char* sender, int connfd){
@@ -94,7 +94,6 @@ void send_message(char* buf, char* sender, int connfd){
     *(receiver + strcspn(receiver, " ")) = '\0';
     message = malloc(strlen(buf) - strlen(receiver) + 1);
     strncpy(message, buf + strlen(receiver) + 2, strlen(buf) - strlen(receiver) + 1);
-    *(message + strcspn(message, "\n")) = '\0';
     //printf("The message \"%s\" was directed to %s.\n", message, receiver);
     for(i = 0; i < usercount; i++){
         if(!strcmp(receiver, "broadcast")){
@@ -102,12 +101,11 @@ void send_message(char* buf, char* sender, int connfd){
         } else {
             if(!strcmp(connected[i].username, receiver)){
                 char* tosend;
-                tosend = malloc(strlen(sender) + strlen(message) + 4);
+                tosend = malloc(strlen(sender) + strlen(message) + 3);
                 strcpy(tosend, "@");
                 strcat(tosend, sender);
                 strcat(tosend, " ");
                 strcat(tosend, message);
-                strcat(tosend, "\n");
                 Rio_writen(connected[i].fd, tosend, strlen(tosend));
                 break;
             } else if (i == (usercount-1)){
