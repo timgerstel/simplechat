@@ -61,6 +61,7 @@ void add_client(char* username, int connfd){
     if(!strcmp(username, "") || username == NULL){
         app_error("Invalid username");
     }
+
     connected[usercount].fd = connfd;
     connected[usercount].username = username;
     connected[usercount].valid = true;
@@ -90,6 +91,13 @@ void send_message(char* buf, char* sender, int connfd){
     char* message;
     int i;
     receiver = malloc(strcspn(buf, " "));
+    if(buf[0]!='@'){
+        char* err = "Invalid command or command promt\n";
+        char* err2 = "usage: @<user> <messag>\n";
+        Rio_writen(connfd, err, strlen(err));
+        Rio_writen(connfd, err2, strlen(err2));
+        return;
+    }
     strncpy(receiver, buf + 1, strcspn(buf, " "));
     *(receiver + strcspn(receiver, " ")) = '\0';
     message = malloc(strlen(buf) - strlen(receiver) + 1);
