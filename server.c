@@ -92,7 +92,7 @@ void send_message(char* buf, char* sender, int connfd){
     int i;
     receiver = malloc(strcspn(buf, " "));
     if(buf[0]!='@'){
-        char* err = "Invalid command or command promt\n";
+        char* err = "Invalid command or command prompt\n";
         char* err2 = "usage: @<user> <messag>\n";
         Rio_writen(connfd, err, strlen(err));
         Rio_writen(connfd, err2, strlen(err2));
@@ -109,12 +109,13 @@ void send_message(char* buf, char* sender, int connfd){
         } else {
             if(!strcmp(connected[i].username, receiver)){
                 char* tosend;
-                tosend = malloc(strlen(sender) + strlen(message) + 3);
-                strcpy(tosend, "@");
+                tosend = malloc(strlen(sender) + strlen(message) + 4);
+                strcpy(tosend, ">@");
                 strcat(tosend, sender);
                 strcat(tosend, " ");
                 strcat(tosend, message);
                 Rio_writen(connected[i].fd, tosend, strlen(tosend));
+                
                 break;
             } else if (i == (usercount-1)){
                 char* err = "User not found\n";
