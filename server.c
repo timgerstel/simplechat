@@ -42,8 +42,9 @@ void echo(int connfd)
             for(i = 0; i < usercount; i++){
                 if(connected[i].valid){
                     char* user;
-                    user = malloc(strlen(connected[i].username) + 1);
-                    strcpy(user, connected[i].username);
+                    user = malloc(strlen(connected[i].username) + 2);
+                    strcpy(user,"-");
+                    strcat(user, connected[i].username);
                     strcat(user, "\n");
                     Rio_writen(connfd, user, strlen(user));
                 }
