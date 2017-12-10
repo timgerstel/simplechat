@@ -46,6 +46,7 @@ void *send_thread(void *vargp){
     while (Fgets(buf, MAXLINE, stdin) != NULL) {
         if(!strcmp(buf, "quit\n")){
             Rio_writen(clientfd, buf, strlen(buf));
+            Fputs("GoodBye!\n",stdout);
             break;
         }
         Rio_writen(clientfd, buf, strlen(buf));
