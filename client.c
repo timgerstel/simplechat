@@ -8,9 +8,9 @@
 void *send_thread(void *vargp);
 void *receive_thread(void *vargp);
 
-// void prompt(){
-//     Fputs(">", stdout);
-// }
+void prompt(){
+    fprintf(stdout, "> ");
+}
 
 int main(int argc, char **argv) 
 {
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     strcpy(buf, username);
     strcat(buf, "\n");
     Rio_writen(clientfd, buf, strlen(buf));
-    //prompt();
+    prompt();
     Pthread_create(&tid1, NULL, send_thread, (void *) &clientfd);
     Pthread_create(&tid2, NULL, receive_thread, (void *) &rio);
     Pthread_exit(NULL);
@@ -50,7 +50,7 @@ void *send_thread(void *vargp){
             break;
         }
         Rio_writen(clientfd, buf, strlen(buf));
-       
+        prompt();
     }
     Close(clientfd);
     exit(0);
@@ -64,9 +64,11 @@ void *receive_thread(void *vargp){
     char buf[MAXLINE];
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0){
         //Rio_readlineb(&rio, buf, MAXLINE);
-        Fputs(buf, stdout);
-        //prompt();
+        printf("%s", buf);
+        printf("> ");
+        fflush(stdout);
     }
+    prompt();
     return NULL;
 }
 

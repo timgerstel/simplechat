@@ -110,13 +110,12 @@ void send_message(char* buf, char* sender, int connfd){
         } else {
             if(!strcmp(connected[i].username, receiver)){
                 char* tosend;
-                tosend = malloc(strlen(sender) + strlen(message) + 4);
-                strcpy(tosend, ">@");
+                tosend = malloc(strlen(sender) + strlen(message) + 8);
+                strcpy(tosend, "\r@");
                 strcat(tosend, sender);
                 strcat(tosend, " ");
                 strcat(tosend, message);
                 Rio_writen(connected[i].fd, tosend, strlen(tosend));
-                
                 break;
             } else if (i == (usercount-1)){
                 char* err = "User not found\n";
